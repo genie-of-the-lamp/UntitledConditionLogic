@@ -1,6 +1,7 @@
 # -*- coding : utf-8 -*-
 # 2020.03.04 ~
 # author : genie.jung
+# language : python 3.7.3
 
 from .option import *
 from .logic import *
