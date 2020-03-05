@@ -38,7 +38,6 @@ class Logic(object):
                 _, incomp = self.find_option_by_name(incomp_name)
                 option.add_incompatible(incomp)
 
-
     def get_option(self, id):
         if id in self._options:
             option = self._options.get(id)

@@ -46,10 +46,33 @@ def test_select_and_print(logic, selected_ids=[]):
     print("selected_option_ids: {}".format(logic.selected_option_ids))
     print("enable_option_ids: {}".format(list(map(lambda x: x.id(), logic.enabled_option))))
     print("disable_option_ids: {}\n".format(list(map(lambda x: x.id(), logic.disabled_option))))
+
+def test_option_merge(logic, disable_set, enable_set):
+    opts = []
+    print("options : \n{}".format("\n".join(["\t{}: {}".format(opt.id(), opt.name()) for opt in logic._options.values()])))
+    print("disable case")
+    try:
+        disable = Untitled.CompositeOption(id=len(opts), name="disable_case",
+                                           parents=[logic.get_option(disable_set[0]),logic.get_option(disable_set[1])])
+        opts.append(disable)
+    except Untitled.OptionMergeError as e:
+        print(e)
+
+    print("enable case")
+    enable = Untitled.CompositeOption(id=len(opts), name="enable_case",
+                                      parents=[logic.get_option(enable_set[0]),logic.get_option(enable_set[1])])
+    opts.append(enable)
+    print([opt.name() for opt in opts])
+
 if __name__ == "__main__":
-    #Test to add option into logic.
+
     logic = Untitled.Logic()
     logic.load_option_data(test_option_data)
+
+    #Test to add option into logic.
     test_select_and_print(logic)
     test_select_and_print(logic, [1])
     test_select_and_print(logic, [5])
+
+    #Test to merge options.
+    test_option_merge(logic, disable_set=(0,1), enable_set=(1,3))

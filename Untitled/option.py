@@ -82,13 +82,14 @@ class CompositeOption(Option):
                             for child in parent.children()])
         old_incomp_opts = set([option for parent in self._parents
                                for option in parent.incompatible()])
-        parents_ids = set([parent.id() for parent in self._parents])
-        # There are options that cannot be merged.
-        if parents_ids.intersection(old_incomp_opts):
-            # TODO: this error should be implement as new one.
-            raise OptionMergeError
 
-        old_incomp_opts.update(parents_ids)
+        collisions = set(self._parents).intersection(old_incomp_opts)
+        # There are options that cannot be merged.
+        if collisions:
+            collision_names = [collision.name() for collision in collisions]
+            raise OptionMergeError("OptionMergeError: '{}' option(s) conflicts.".format("', '".join(collision_names)))
+
+        old_incomp_opts.update(set(self._parents))
         old_children.difference_update(old_incomp_opts)
 
         self.set_children(list(set(self.children()).union(old_children)))
