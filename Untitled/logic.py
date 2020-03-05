@@ -5,20 +5,39 @@ import re
 class Logic(object):
     def __init__(self, option_data=[]):
         self._options = defaultdict(Option)
-        self.selected_options = []
-        self.enabled = set()
-        self.disabled = set()
+        self.selected_option_ids = set()
+        self.enabled_option = set()
+        self.disabled_option = set()
 
         if option_data:
             self.load_option_data(option_data)
 
     def load_option_data(self, option_data):
+        temp_option_data = {
+            "children": {},
+            "incompatible": {},
+        }
         for data in option_data:
             option = self.create_option(data.get("name"), optional=data.get("optional"))
             if data.get("children"):
-                option._child_options.extend(data.get("children"))
+                temp_option_data["children"][option.id()] = data.get("children")
             if data.get("incompatible"):
-                option._incompatible_options.extend(data.get("incompatible"))
+                temp_option_data["incompatible"][option.id()] = data.get("incompatible")
+
+        for option_id, child_names in temp_option_data["children"].items():
+            option = self.get_option(option_id)
+            while child_names:
+                child_name = child_names.pop()
+                _, child = self.find_option_by_name(child_name)
+                option.add_child(child)
+
+        for option_id, incomp_names in temp_option_data["incompatible"].items():
+            option = self.get_option(option_id)
+            while incomp_names:
+                incomp_name = incomp_names.pop()
+                _, incomp = self.find_option_by_name(incomp_name)
+                option.add_incompatible(incomp)
+
 
     def get_option(self, id):
         if id in self._options:
@@ -36,11 +55,12 @@ class Logic(object):
             exist_name = result[0]
             numbering = exist_name == name and 1 or int( exist_name[len(name):] )+1
             name = "{}{}".format(name, numbering)
-        self._options[id] = Option(id, name, optional=optional)
+        option = Option(id, name, optional=optional)
+        self._options[id] = option
         if not optional:
-            self.enabled.add(id)
+            self.enabled_option.add(option)
 
-        return self._options.get(id)
+        return option
 
     def find_option_by_name(self, name, ambiguous=False):
         suffix = ""
@@ -64,13 +84,13 @@ class Logic(object):
 
     def calculate(self, added_selection=None):
         if added_selection:
-            unexist = [option for option in added_selection if option not in self.selected_options]
-            if unexist:
-                self.selected_options.extend(unexist)
+            self.selected_option_ids.update(added_selection)
 
-        selected_options = self.selected_options
+        selected_options = self.selected_option_ids
         for option_id in selected_options:
             option = self.get_option(option_id)
-            self.enabled.update(set(option.children()))
-            self.disabled.update(set(option.incompatible()))
-        self.enabled.difference_update(self.disabled, self.selected_options)
+            if option in self.enabled_option:
+                self.enabled_option.remove(option)
+            self.enabled_option.update(set(option.children()))
+            self.disabled_option.update(set(option.incompatible()))
+        self.enabled_option.difference_update(self.disabled_option)

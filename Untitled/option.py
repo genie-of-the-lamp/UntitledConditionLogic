@@ -37,12 +37,12 @@ class Option(object):
             self.add_child(child)
 
     def add_child(self, child):
-        if child.id() not in self.children():
-            self._child_options.append(child.id())
+        if child not in self.children():
+            self._child_options.append(child)
 
     def remove_child(self, child):
-        if child.id() in self._child_options:
-            del self._child_options[self._child_options.index(child.id())]
+        if child in self._child_options:
+            self._child_options.remove(child)
             return True
         return False
 
@@ -55,12 +55,12 @@ class Option(object):
             self.add_incompatible(option)
 
     def add_incompatible(self, option):
-        if option.id() not in self.incompatible():
-            self._incompatible_options.append(option.id())
+        if option not in self.incompatible():
+            self._incompatible_options.append(option)
 
     def remove_incompatible(self, option):
-        if option.id() in self._incompatible_options:
-            del self._incompatible_options[self._incompatible_options.index(option.id())]
+        if option in self._incompatible_options:
+            self._incompatible_options.remove(option)
             return True
         return False
 
@@ -82,10 +82,20 @@ class CompositeOption(Option):
                             for child in parent.children()])
         old_incomp_opts = set([option for parent in self._parents
                                for option in parent.incompatible()])
-
-        if set([parent.id() for parent in self._parents]).intersection(old_incomp_opts):
+        parents_ids = set([parent.id() for parent in self._parents])
+        # There are options that cannot be merged.
+        if parents_ids.intersection(old_incomp_opts):
             # TODO: this error should be implement as new one.
-            raise ValueError
+            raise OptionMergeError
 
+        old_incomp_opts.update(parents_ids)
         old_children.difference_update(old_incomp_opts)
+
         self.set_children(list(set(self.children()).union(old_children)))
+        self.set_incompatible(list(set(self.incompatible()).union(old_incomp_opts)))
+
+
+class OptionMergeError(Exception):
+    """
+    There are options that cannot be merged.
+    """
