@@ -5,43 +5,41 @@ test_option_data = [
         "name": "NAVI_A",
          "id": 0,
          "children": [3,4],
-         "incompatible": [1,2]
+         "incompatible": [1,2],
+        "optional": False
     },
     {
         "name": "NAVI_B",
          "id": 1,
          "children": [3,5],
-         "incompatible": [0,2]
+         "incompatible": [0,2],
+        "optional": False
      },
     {
         "name": "AUDIO",
          "id": 2,
          "children": [5],
-         "incompatible": [0,1]
+         "incompatible": [0,1],
+        "optional": False
      },
     {
         "name":"BLUETOOTH",
-         "id": 3
+         "id": 3,
+        "optional": True
      },
     {
         "name":"WIRELESS_CHARGE",
          "id": 4,
-         "incompatible": [5]
+         "incompatible": [5],
+        "optional": True
      },
     {
         "name":"HIGHEND_SPEAKER",
          "id": 5,
-         "incompatible": [4]
+         "incompatible": [4],
+        "optional": True
      }
 ]
-
-def test_data_input(logic):
-    for data in test_option_data:
-        opt = logic.create_option(data.get("name"))
-        if data.get("children"):
-            opt._child_options.extend(data.get("children"))
-        if data.get("incompatible"):
-            opt._incompatible_options.extend(data.get("incompatible"))
 
 def test_select_and_print(logic, selected_ids=[]):
     logic.calculate(added_selection=selected_ids)
@@ -52,6 +50,7 @@ def test_select_and_print(logic, selected_ids=[]):
 
 if __name__ == "__main__":
     logic = Untitled.Logic()
-    test_data_input(logic)
+    logic.load_option_data(test_option_data)
+    test_select_and_print(logic)
     test_select_and_print(logic, [1])
     test_select_and_print(logic, [5])

@@ -1,8 +1,5 @@
 class Option(object):
-    """
-    TODO: It should be possible to check if this option is Mandatory Option.
-    """
-    def __init__(self, id, name, text="", children=None, incompatible=None):
+    def __init__(self, id, name, text="", children=None, incompatible=None, optional=False):
         self._id = id
         self._name = name
         self._text = text
@@ -12,6 +9,7 @@ class Option(object):
         self._incompatible_options = incompatible
         if not self._incompatible_options:
             self._incompatible_options = []
+        self.is_mandatory = not optional
 
     def id(self):
         return self._id
