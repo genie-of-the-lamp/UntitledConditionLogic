@@ -48,21 +48,19 @@ def test_select_and_print(logic, selected_ids=[]):
     print("disable_option_ids: {}\n".format(list(map(lambda x: x.id(), logic.disabled_option))))
 
 def test_option_merge(logic, disable_set, enable_set):
-    opts = []
     print("options : \n{}".format("\n".join(["\t{}: {}".format(opt.id(), opt.name()) for opt in logic._options.values()])))
     print("disable case")
     try:
-        disable = Untitled.CompositeOption(id=len(opts), name="disable_case",
+        disable = Untitled.CompositeOption(id=len(logic._options), name="disable_case",
                                            parents=[logic.get_option(disable_set[0]),logic.get_option(disable_set[1])])
-        opts.append(disable)
+        print("{} is created.".format(disable.name()))
     except Untitled.OptionMergeError as e:
         print(e)
 
     print("enable case")
     enable = Untitled.CompositeOption(id=len(opts), name="enable_case",
                                       parents=[logic.get_option(enable_set[0]),logic.get_option(enable_set[1])])
-    opts.append(enable)
-    print([opt.name() for opt in opts])
+    print("{} is created.".format(enable.name()))
 
 if __name__ == "__main__":
 
