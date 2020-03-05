@@ -5,6 +5,7 @@
 
 from .option import *
 from .logic import *
+from .item import *
 
 
 # This project is developed by borrowing the ideas used in Macevision's COBA 3.0 version.
