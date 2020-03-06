@@ -58,7 +58,7 @@ def test_option_merge(logic, disable_set, enable_set):
         print(e)
 
     print("enable case")
-    enable = Untitled.CompositeOption(id=len(opts), name="enable_case",
+    enable = Untitled.CompositeOption(id=len(logic._options), name="enable_case",
                                       parents=[logic.get_option(enable_set[0]),logic.get_option(enable_set[1])])
     print("{} is created.".format(enable.name()))
 
