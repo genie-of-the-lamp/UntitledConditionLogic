@@ -81,7 +81,9 @@ class Logic(object):
 
         return matched[0]
 
-    def calculate(self, added_selection=None):
+    def calculate(self, added_selection=None, do_clear=False):
+        if do_clear:
+            self.selected_option_ids.clear()
         if added_selection:
             self.selected_option_ids.update(added_selection)
 
