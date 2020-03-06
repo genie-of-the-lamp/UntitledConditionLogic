@@ -49,7 +49,7 @@ def test_select_and_print(logic, selected_ids=[]):
 
 def test_option_merge(logic, disable_set, enable_set):
     print("options : \n{}".format("\n".join(["\t{}: {}".format(opt.id(), opt.name()) for opt in logic._options.values()])))
-    print("disable case")
+    print("disable case - {}".format(disable_set))
     try:
         disable = Untitled.CompositeOption(id=len(logic._options), name="disable_case",
                                            parents=[logic.get_option(disable_set[0]),logic.get_option(disable_set[1])])
@@ -57,12 +57,12 @@ def test_option_merge(logic, disable_set, enable_set):
     except Untitled.OptionMergeError as e:
         print(e)
 
-    print("enable case")
+    print("enable case - {}".format(enable_set))
     enable = Untitled.CompositeOption(id=len(logic._options), name="enable_case",
                                       parents=[logic.get_option(enable_set[0]),logic.get_option(enable_set[1])])
     print("{} is created.".format(enable.name()))
 
-def test_conditioned_items():
+def test_conditioned_items(logic):
     selected_options = {
         "case 1": ("NAVI_A", "BLUETOOTH", "WIRELESS_CHARGE"),
         "case 2": ("NAVI_B", "BLUETOOTH"),
@@ -79,9 +79,6 @@ def test_conditioned_items():
             "exclusive": ["WIRELESS_CHARGE"]
         }
     ]
-
-    logic = Untitled.Logic()
-    logic.load_option_data(test_option_data)
     item = Untitled.ConditionedItem("test_item")
 
     #set condition into item.
@@ -92,25 +89,29 @@ def test_conditioned_items():
                      for opt_name in condition_set.get("exclusive", [])]
         item.add_condition(combined=combined,
                            exclusive=exclusive)
-
+    print("item's conditions : {}".format("/".join()))
     #print resoved result by case.
     for case, selected_names in selected_options.items():
         selected = [logic.find_option_by_name(name)[-1] for name in selected_names]
-        logic.calculate(added_selection=selected, after_clear=True)
-        print("{}: {}".format(case, item.item_resolve(logic.selected_option_ids)))
+        logic.calculate(added_selection=selected, do_clear=True)
+        print("{}:{}\n\t -> {}".format(case,
+                                       ", ".join(selected_names),
+                                       item.item_resolve(logic.selected_option_ids)))
 
 if __name__ == "__main__":
-
     logic = Untitled.Logic()
     logic.load_option_data(test_option_data)
 
     #Test to add option into logic.
+    print("1) Test to add option into logic.")
     test_select_and_print(logic)
     test_select_and_print(logic, [1])
     test_select_and_print(logic, [5])
 
     #Test to merge options.
+    print("\n2) Test to merge options.")
     test_option_merge(logic, disable_set=(0,1), enable_set=(1,3))
 
-    #Item Test
-    test_conditioned_items()
+    #Test to match item's condition with logic's selected options.
+    print("\n3) Test to match item's condition with logic's selected options.")
+    test_conditioned_items(logic)
