@@ -62,6 +62,43 @@ def test_option_merge(logic, disable_set, enable_set):
                                       parents=[logic.get_option(enable_set[0]),logic.get_option(enable_set[1])])
     print("{} is created.".format(enable.name()))
 
+def test_conditioned_items():
+    selected_options = {
+        "case 1": ("NAVI_A", "BLUETOOTH", "WIRELESS_CHARGE"),
+        "case 2": ("NAVI_B", "BLUETOOTH"),
+        "case 3": ("NAVI_B", "BLUETOOTH", "HIGHEND_SPEAKER")
+    }
+    # items scenario
+    # : bluetooth device but wireless charging is not supported.
+    condition_sets = [
+        {
+            "combined": ["NAVI_B", "BLUETOOTH"],
+        },
+        {
+            "combined": ["NAVI_A", "BLUETOOTH"],
+            "exclusive": ["WIRELESS_CHARGE"]
+        }
+    ]
+
+    logic = Untitled.Logic()
+    logic.load_option_data(test_option_data)
+    item = Untitled.ConditionedItem("test_item")
+
+    #set condition into item.
+    for condition_set in condition_sets:
+        combined = [logic.find_option_by_name(opt_name)[-1]
+                    for opt_name in condition_set.get("combined", [])]
+        exclusive = [logic.find_option_by_name(opt_name)[-1]
+                     for opt_name in condition_set.get("exclusive", [])]
+        item.add_condition(combined=combined,
+                           exclusive=exclusive)
+
+    #print resoved result by case.
+    for case, selected_names in selected_options.items():
+        selected = [logic.find_option_by_name(name)[-1] for name in selected_names]
+        logic.calculate(added_selection=selected, after_clear=True)
+        print("{}: {}".format(case, item.item_resolve(logic.selected_option_ids)))
+
 if __name__ == "__main__":
 
     logic = Untitled.Logic()
@@ -74,3 +111,6 @@ if __name__ == "__main__":
 
     #Test to merge options.
     test_option_merge(logic, disable_set=(0,1), enable_set=(1,3))
+
+    #Item Test
+    test_conditioned_items()
